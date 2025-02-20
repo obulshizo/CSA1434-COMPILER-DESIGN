@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+char stack[100];
+int top = -1, temp_count = 1;
+
+void push(char x) {
+    stack[++top] = x;
+}
+
+char pop() {
+    return stack[top--];
+}
+
+int precedence(char x) {
+    if (x == '+' || x == '-') return 1;
+    if (x == '*' || x == '/') return 2;
+    return 0;
+}
+
+// Convert Infix to Postfix
+void infixToPostfix(char infix[], char postfix[]) {
+    int i = 0, j = 0;
+    char x;
+    while (infix[i] != '\0') {
+        if (isalnum(infix[i])) {
+            postfix[j++] = infix[i];
+        } else if (infix[i] == '(') {
+            push(infix[i]);
+        } else if (infix[i] == ')') {
+            while (top != -1 && stack[top] != '(') {
+                postfix[j++] = pop();
+            }
+            pop(); // Remove '('
+        } else {
+            while (top != -1 && precedence(stack[top]) >= precedence(infix[i])) {
+                postfix[j++] = pop();
+            }
+            push(infix[i]);
+        }
+        i++;
+    }
+    while (top != -1) {
+        postfix[j++] = pop();
+    }
+    postfix[j] = '\0';
+}
+
+// Generate Three Address Code
+void generateTAC(char postfix[]) {
+    char op1, op2;
+    char tempVar[3] = "T"; // Temporary variable storage
+
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        if (isalnum(postfix[i])) {
+            push(postfix[i]);
+        } else {
+            op2 = pop();
+            op1 = pop();
+            printf("t%d = %c %c %c\n", temp_count, op1, postfix[i], op2);
+            push('T'); // Push a temporary result placeholder
+            temp_count++;
+        }
+    }
+}
+
+int main() {
+    char infix[100], postfix[100];
+
+    printf("Enter an infix expression: ");
+    scanf("%s", infix);  // Read infix expression (no spaces)
+
+    infixToPostfix(infix, postfix);
+    printf("\nThree Address Code:\n");
+    generateTAC(postfix);
+
+    return 0;
+}
