@@ -1,0 +1,15 @@
+%{
+#include <stdio.h>
+%}
+
+%%
+^[aeiouAEIOU][a-zA-Z]*  { printf("Valid: %s\n", yytext); }
+.|\n                    { /* Ignore other input */ }
+%%
+
+int yywrap() { return 1; }
+
+int main() {
+    yylex();
+    return 0;
+}
